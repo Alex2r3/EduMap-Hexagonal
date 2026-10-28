@@ -1,0 +1,16 @@
+bin/
+obj/
+.idea/
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.userprefs
+*.pidb
+*.booproj
+*.svclog
+appsettings.Development.json
+*.log
+_ReSharper*/
+*.DotSettings.user
