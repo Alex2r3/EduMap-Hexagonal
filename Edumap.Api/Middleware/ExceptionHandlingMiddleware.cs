@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Net;
-using System.Text.Json;
+﻿using Edumap.Application.Exceptions;
+using Edumap.Domain.Exceptions;
 
 namespace Edumap.Api.Middleware;
 
-// Middleware: interceptor global de excepciones para estandarizar respuestas de error en formato JSON
-public class ExceptionHandlingMiddleware(RequestDelegate next)
+// Middleware: interceptor global de excepciones que traduce los errores de dominio/aplicación a códigos HTTP en formato JSON.
+// Los errores inesperados se registran en el log y se responden con un mensaje genérico para no filtrar detalles internos.
+public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
 {
     public async Task InvokeAsync(HttpContext context)
     {
@@ -15,10 +15,22 @@ public class ExceptionHandlingMiddleware(RequestDelegate next)
         }
         catch (Exception ex)
         {
-            context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            var response = new { message = ex.Message };
-            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+            var (statusCode, message) = ex switch
+            {
+                DomainException or ValidationException => (StatusCodes.Status400BadRequest, ex.Message),
+                NotFoundException => (StatusCodes.Status404NotFound, ex.Message),
+                ConflictException => (StatusCodes.Status409Conflict, ex.Message),
+                _ => (StatusCodes.Status500InternalServerError, "Ocurrió un error inesperado.")
+            };
+
+            if (statusCode == StatusCodes.Status500InternalServerError)
+                logger.LogError(ex, "Error no controlado en {Method} {Path}", context.Request.Method, context.Request.Path);
+
+            if (context.Response.HasStarted)
+                throw;
+
+            context.Response.StatusCode = statusCode;
+            await context.Response.WriteAsJsonAsync(new { message });
         }
     }
 }

@@ -31,6 +31,17 @@ El backend está desarrollado bajo los principios de **Arquitectura Hexagonal (P
 * **`Edumap.Infrastructure`**: Adaptadores secundarios para persistencia (Entity Framework Core con PostgreSQL), seguridad (BCrypt, JWT) y configuraciones técnicas.
 * **`Edumap.Api`**: Adaptador primario REST. Controladores delgados que despachan solicitudes hacia la capa de aplicación a través de MediatR.
 
+## Configuración Local
+
+La cadena de conexión y la clave de firma JWT **no se guardan en el repositorio**. Antes de ejecutar la API, configúralas con *user-secrets* (solo se cargan en el entorno `Development`):
+
+```bash
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Port=5432;Database=edumap;Username=postgres;Password=<tu-clave>" --project Edumap.Api
+dotnet user-secrets set "Jwt:Key" "<clave-aleatoria-de-al-menos-32-caracteres>" --project Edumap.Api
+```
+
+En otros entornos usa las variables `ConnectionStrings__DefaultConnection` y `Jwt__Key`. Si falta alguna, la API se detiene al arrancar con un mensaje indicando qué configurar.
+
 ## Tecnologías Utilizadas
 
 * **.NET 10** (C#)

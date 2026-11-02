@@ -1,51 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Edumap.Domain.Entities;
+using Edumap.Infrastructure.Data.ReadModels;
 
-namespace Edumap.Infrastructure.Models;
+namespace Edumap.Infrastructure.Data;
 
-public partial class ApplicationDbContext : DbContext
+// Acceso a Datos: mapea las entidades de dominio a las tablas de PostgreSQL y las vistas a modelos de lectura.
+// La cadena de conexión se inyecta desde la configuración (ver InfrastructureServicesExtensions).
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-    public ApplicationDbContext()
-    {
-    }
+    public DbSet<Categoria> Categorias => Set<Categoria>();
 
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
-    {
-    }
+    public DbSet<Distrito> Distritos => Set<Distrito>();
 
-    public virtual DbSet<Categorium> Categoria { get; set; }
+    public DbSet<Institucion> Instituciones => Set<Institucion>();
 
-    public virtual DbSet<Distrito> Distritos { get; set; }
+    public DbSet<NivelEducativo> NivelesEducativos => Set<NivelEducativo>();
 
-    public virtual DbSet<Institucion> Institucions { get; set; }
+    public DbSet<OfertaEducativa> OfertasEducativas => Set<OfertaEducativa>();
 
-    public virtual DbSet<NivelEducativo> NivelEducativos { get; set; }
+    public DbSet<Resena> Resenas => Set<Resena>();
 
-    public virtual DbSet<OfertaEducativa> OfertaEducativas { get; set; }
+    public DbSet<Rol> Roles => Set<Rol>();
 
-    public virtual DbSet<Resena> Resenas { get; set; }
+    public DbSet<Usuario> Usuarios => Set<Usuario>();
 
-    public virtual DbSet<Rol> Rols { get; set; }
+    public DbSet<VwCalificacionInstitucion> VwCalificacionInstituciones => Set<VwCalificacionInstitucion>();
 
-    public virtual DbSet<Usuario> Usuarios { get; set; }
+    public DbSet<VwInstitucionResumen> VwInstitucionResumen => Set<VwInstitucionResumen>();
 
-    public virtual DbSet<VwCalificacionInstitucion> VwCalificacionInstitucions { get; set; }
+    public DbSet<VwReporteCategoria> VwReporteCategorias => Set<VwReporteCategoria>();
 
-    public virtual DbSet<VwInstitucionResuman> VwInstitucionResumen { get; set; }
-
-    public virtual DbSet<VwReporteCategoria> VwReporteCategorias { get; set; }
-
-    public virtual DbSet<VwReporteParticipacion> VwReporteParticipacions { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=localhost;Database=edumap;Username=postgres;Password=Clave321;Port=5432");
+    public DbSet<VwReporteParticipacion> VwReporteParticipacion => Set<VwReporteParticipacion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Categorium>(entity =>
+        modelBuilder.Entity<Categoria>(entity =>
         {
             entity.HasKey(e => e.IdCategoria).HasName("categoria_pkey");
 
@@ -142,17 +131,17 @@ public partial class ApplicationDbContext : DbContext
                 .HasMaxLength(20)
                 .HasColumnName("whatsapp");
 
-            entity.HasOne(d => d.IdCategoriaNavigation).WithMany(p => p.Institucions)
+            entity.HasOne(d => d.Categoria).WithMany(p => p.Instituciones)
                 .HasForeignKey(d => d.IdCategoria)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("institucion_id_categoria_fkey");
 
-            entity.HasOne(d => d.IdDistritoNavigation).WithMany(p => p.Institucions)
+            entity.HasOne(d => d.Distrito).WithMany(p => p.Instituciones)
                 .HasForeignKey(d => d.IdDistrito)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("institucion_id_distrito_fkey");
 
-            entity.HasOne(d => d.IdRepresentanteNavigation).WithMany(p => p.Institucions)
+            entity.HasOne(d => d.Representante).WithMany(p => p.InstitucionesRepresentadas)
                 .HasForeignKey(d => d.IdRepresentante)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("institucion_id_representante_fkey");
@@ -211,11 +200,11 @@ public partial class ApplicationDbContext : DbContext
                 .HasPrecision(10, 2)
                 .HasColumnName("pension_min");
 
-            entity.HasOne(d => d.IdInstitucionNavigation).WithMany(p => p.OfertaEducativas)
+            entity.HasOne(d => d.Institucion).WithMany(p => p.OfertasEducativas)
                 .HasForeignKey(d => d.IdInstitucion)
                 .HasConstraintName("oferta_educativa_id_institucion_fkey");
 
-            entity.HasOne(d => d.IdNivelNavigation).WithMany(p => p.OfertaEducativas)
+            entity.HasOne(d => d.NivelEducativo).WithMany(p => p.OfertasEducativas)
                 .HasForeignKey(d => d.IdNivel)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("oferta_educativa_id_nivel_fkey");
@@ -247,11 +236,11 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.IdInstitucion).HasColumnName("id_institucion");
             entity.Property(e => e.IdUsuario).HasColumnName("id_usuario");
 
-            entity.HasOne(d => d.IdInstitucionNavigation).WithMany(p => p.Resenas)
+            entity.HasOne(d => d.Institucion).WithMany(p => p.Resenas)
                 .HasForeignKey(d => d.IdInstitucion)
                 .HasConstraintName("resena_id_institucion_fkey");
 
-            entity.HasOne(d => d.IdUsuarioNavigation).WithMany(p => p.Resenas)
+            entity.HasOne(d => d.Usuario).WithMany(p => p.Resenas)
                 .HasForeignKey(d => d.IdUsuario)
                 .HasConstraintName("resena_id_usuario_fkey");
         });
@@ -310,7 +299,7 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnName("telefono");
             entity.Property(e => e.UltimoAcceso).HasColumnName("ultimo_acceso");
 
-            entity.HasOne(d => d.IdRolNavigation).WithMany(p => p.Usuarios)
+            entity.HasOne(d => d.Rol).WithMany(p => p.Usuarios)
                 .HasForeignKey(d => d.IdRol)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("usuario_id_rol_fkey");
@@ -327,7 +316,7 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.TotalResenas).HasColumnName("total_resenas");
         });
 
-        modelBuilder.Entity<VwInstitucionResuman>(entity =>
+        modelBuilder.Entity<VwInstitucionResumen>(entity =>
         {
             entity
                 .HasNoKey()
@@ -389,9 +378,5 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.UsuariosActivos).HasColumnName("usuarios_activos");
             entity.Property(e => e.UsuariosConResenas).HasColumnName("usuarios_con_resenas");
         });
-
-        OnModelCreatingPartial(modelBuilder);
     }
-
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

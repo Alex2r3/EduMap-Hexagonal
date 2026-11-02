@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+namespace Edumap.Infrastructure.Data.ReadModels;
 
-namespace Edumap.Infrastructure.Models;
-
-public partial class VwInstitucionResuman
+public partial class VwInstitucionResumen
 {
     public int? IdInstitucion { get; set; }
 

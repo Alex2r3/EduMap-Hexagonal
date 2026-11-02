@@ -1,17 +1,15 @@
 ﻿using MediatR;
+using Edumap.Application.Ports;
 
 namespace Edumap.Application.UseCases.Resenas.Queries;
 
-// Query CQRS: Consulta la lista de reseñas asociadas a una institución específica
-public record GetResenasByInstitucionIdQuery(Guid InstitucionId) : IRequest<IEnumerable<ResenaDto>>;
+// Query CQRS: Consulta la lista de reseñas visibles asociadas a una institución específica
+public record GetResenasByInstitucionIdQuery(int IdInstitucion) : IRequest<IReadOnlyList<ResenaDto>>;
 
-public record ResenaDto(Guid ResenaId, string Usuario, int Calificacion, string Comentario, DateTime Fecha);
+public record ResenaDto(int IdResena, string Usuario, short Calificacion, string? Comentario, DateTime FechaCreacion);
 
-internal sealed class GetResenasByInstitucionIdQueryHandler : IRequestHandler<GetResenasByInstitucionIdQuery, IEnumerable<ResenaDto>>
+internal sealed class GetResenasByInstitucionIdQueryHandler(IResenaQueries queries) : IRequestHandler<GetResenasByInstitucionIdQuery, IReadOnlyList<ResenaDto>>
 {
-    public async Task<IEnumerable<ResenaDto>> Handle(GetResenasByInstitucionIdQuery request, CancellationToken cancellationToken)
-    {
-        await Task.CompletedTask;
-        return Enumerable.Empty<ResenaDto>();
-    }
+    public Task<IReadOnlyList<ResenaDto>> Handle(GetResenasByInstitucionIdQuery request, CancellationToken cancellationToken)
+        => queries.GetVisiblesByInstitucionAsync(request.IdInstitucion, cancellationToken);
 }

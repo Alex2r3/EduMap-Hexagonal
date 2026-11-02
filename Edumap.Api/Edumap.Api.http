@@ -1,6 +1,22 @@
 @Edumap.Api_HostAddress = http://localhost:5138
 
-GET {{Edumap.Api_HostAddress}}/weatherforecast/
+GET {{Edumap.Api_HostAddress}}/api/instituciones/1
 Accept: application/json
+
+###
+
+POST {{Edumap.Api_HostAddress}}/api/instituciones
+Content-Type: application/json
+
+{
+  "idCategoria": 1,
+  "idDistrito": 1,
+  "nombre": "Colegio de prueba",
+  "direccion": "Av. Ejército 123",
+  "tipoGestion": "PRIVADA",
+  "latitud": -16.3989,
+  "longitud": -71.5350,
+  "telefono": "054123456"
+}
 
 ###

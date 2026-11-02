@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Edumap.Infrastructure.Models;
+namespace Edumap.Infrastructure.Data.ReadModels;
 
 public partial class VwReporteParticipacion
 {

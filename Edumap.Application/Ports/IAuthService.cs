@@ -5,5 +5,5 @@ public interface IAuthService
 {
     string HashPassword(string password);
     bool VerifyPassword(string password, string passwordHash);
-    string GenerateJwtToken(Guid userId, string username, string email, string role);
+    string GenerateJwtToken(int userId, string email, string nombreCompleto, string role);
 }
